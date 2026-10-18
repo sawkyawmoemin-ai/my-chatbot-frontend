@@ -4,71 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Assistant Chatbot</title>
-    <!-- Tailwind CSS for Modern Styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #3b0764, #0f172a);
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 550px;
+            overflow: hidden;
+        }
+        .chat-header {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .input-area, .email-area {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        input, select {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        button {
+            background: #9333ea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #a855f7; }
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e9d5ff;
+            text-align: left;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        .preset-btn:hover { background: rgba(255, 255, 255, 0.1); }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px]">
-        <!-- Header -->
-        <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
-            <h1 class="text-white font-semibold text-lg" id="ui-title">AI Chatbot</h1>
-            <!-- Language Selector -->
-            <select id="langSelect" class="bg-slate-800 text-white text-sm rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1 id="ui-title" style="margin: 0; font-size: 16px;">AI Chatbot</h1>
+            <select id="langSelect" style="width: auto;">
                 <option value="en">English</option>
                 <option value="mm">Myanmar</option>
                 <option value="th">Thai</option>
             </select>
         </div>
 
-        <!-- Chat Body / Messages -->
-        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3">
-            <!-- Predefined Questions Container -->
-            <div id="presetQuestions" class="flex flex-col space-y-2 mb-4">
-                <p class="text-xs text-slate-300 font-medium" id="ui-preset-label">Suggested Questions:</p>
-                <!-- Predefined buttons will be populated via JS -->
+        <div id="chatMessages" class="chat-messages">
+            <div id="presetQuestions">
+                <p id="ui-preset-label" style="font-size: 11px; color: #cbd5e1; margin: 0 0 6px 0;">Suggested Questions:</p>
             </div>
         </div>
 
-        <!-- User Email Input (For DB Logging) -->
-        <div class="px-4 py-2 bg-white/5 border-t border-white/10">
-            <input type="email" id="userEmail" placeholder="Enter your email first..." class="w-full bg-slate-800/80 text-white text-sm px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:border-purple-400">
+        <div class="email-area">
+            <input type="email" id="userEmail" placeholder="Enter your email first...">
         </div>
 
-        <!-- Input Area -->
-        <div class="p-3 bg-white/5 border-t border-white/10 flex gap-2">
-            <input type="text" id="userInput" placeholder="Type a message..." class="flex-1 bg-slate-800/80 text-white text-sm px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:border-purple-400">
-            <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition" id="ui-send">Send</button>
+        <div class="input-area chat-input-row">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="sendMessage()" id="ui-send">Send</button>
         </div>
     </div>
 
     <script>
-        // Translations and Predefined Questions Data
         const translations = {
-            en: {
-                title: "AI Chatbot",
-                presetLabel: "Suggested Questions:",
-                send: "Send",
-                placeholder: "Type a message...",
-                emailPlaceholder: "Enter your email first...",
-                questions: ["What is your name?", "How can I contact support?", "What are your services?"]
-            },
-            mm: {
-                title: "AI စကားပြောစက်",
-                presetLabel: "မေးခွန်း לדוגမာများ (Suggested):",
-                send: "ပို့မည်",
-                placeholder: "စာရိုက်ထည့်ပါ...",
-                emailPlaceholder: "သင့်အီးမေးလ်ကို ဦးစွာထည့်ပါ...",
-                questions: ["သင့်နာမည်ဘယ်သူလဲ။", "ပံ့ပိုးကူညီမှုကို ဘယ်လိုဆက်သွယ်ရမလဲ။", "ဘာဝန်ဆောင်မှုတွေ ပေးလဲ။"]
-            },
-            th: {
-                title: "แชทบอท AI",
-                presetLabel: "คำถามที่แนะนำ:",
-                send: "ส่ง",
-                placeholder: "พิมพ์ข้อความ...",
-                emailPlaceholder: "ใส่อีเมลของคุณก่อน...",
-                questions: ["คุณชื่ออะไร", "ฉันจะติดต่อฝ่ายสนับสนุนได้อย่างไร", "คุณให้บริการอะไรบ้าง"]
-            }
+            en: { title: "AI Chatbot", presetLabel: "Suggested Questions:", send: "Send", placeholder: "Type a message...", emailPlaceholder: "Enter your email first...", questions: ["What is your name?", "How can I contact support?", "What are your services?"] },
+            mm: { title: "AI စကားပြောစက်", presetLabel: "အကြံပြုမေးခွန်းများ:", send: "ပို့မည်", placeholder: "စာရိုက်ထည့်ပါ...", emailPlaceholder: "သင့်အီးမေးလ်ကို ဦးစွာထည့်ပါ...", questions: ["သင့်နာမည်ဘယ်သူလဲ။", "ပံ့ပိုးကူညီမှုကို ဘယ်လိုဆက်သွယ်ရမလဲ။", "ဘာဝန်ဆောင်မှုတွေ ပေးလဲ။"] },
+            th: { title: "แชทบอท AI", presetLabel: "คำถามที่แนะนำ:", send: "ส่ง", placeholder: "พิมพ์ข้อความ...", emailPlaceholder: "ใส่อีเมลของคุณก่อน...", questions: ["คุณชื่ออะไร", "ฉันจะติดต่อฝ่ายสนับสนุนได้อย่างไร", "คุณให้บริการอะไรบ้าง"] }
         };
 
         const qaDatabase = {
@@ -91,23 +142,22 @@
         function updateLanguage() {
             const lang = langSelect.value;
             const t = translations[lang];
-            
             document.getElementById('ui-title').innerText = t.title;
             document.getElementById('ui-preset-label').innerText = t.presetLabel;
             document.getElementById('ui-send').innerText = t.send;
             userInput.placeholder = t.placeholder;
             userEmail.placeholder = t.emailPlaceholder;
 
-            // Update Preset Buttons
             const presetContainer = document.getElementById('presetQuestions');
-            // Keep label, remove old buttons
             const label = document.getElementById('ui-preset-label');
             presetContainer.innerHTML = '';
             presetContainer.appendChild(label);
 
             t.questions.forEach(q => {
                 const btn = document.createElement('button');
-                btn.className = 'text-left bg-white/5 hover:bg-white/10 text-purple-200 text-xs px-3 py-2 rounded-lg border border-white/10 transition';
+                btn.className = 'preset-btn';
+                btn.style.display = 'block';
+                btn.style.width = '100%';
                 btn.innerText = q;
                 btn.onclick = () => { userInput.value = q; sendMessage(); };
                 presetContainer.appendChild(btn);
@@ -115,30 +165,23 @@
         }
 
         langSelect.onchange = updateLanguage;
-        updateLanguage(); // Initial load
+        updateLanguage();
 
         async function sendMessage() {
             const text = userInput.value.trim();
             const email = userEmail.value.trim();
             if (!text) return;
+            if (!email) { alert("Please enter your email first!"); return; }
 
-            if (!email) {
-                alert("Please enter your email first!");
-                return;
-            }
-
-            // Append User Message
             appendMessage(text, 'user');
             userInput.value = '';
 
-            // 1. Check local JSON / Predefined QA first
             if (qaDatabase[text]) {
                 setTimeout(() => {
                     appendMessage(qaDatabase[text], 'bot');
                     logToBackend(email, text, qaDatabase[text], 'json');
                 }, 500);
             } else {
-                // 2. If not in JSON, query FastAPI Backend (AI / ChronoDB)
                 try {
                     const response = await fetch('https://my-chatbot-backend-3y5x.onrender.com/chat', {
                         method: 'POST',
@@ -155,22 +198,22 @@
 
         function appendMessage(text, sender) {
             const div = document.createElement('div');
-            div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `<div class="max-w-[80%] px-3 py-2 rounded-xl text-sm ${sender === 'user' ? 'bg-purple-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-100 rounded-bl-none border border-white/10'}">${text}</div>`;
+            div.style.display = 'flex';
+            div.style.justifyContent = sender === 'user' ? 'flex-end' : 'flex-start';
+            div.style.marginBottom = '8px';
+            div.innerHTML = `<div style="max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; background: ${sender === 'user' ? '#9333ea' : '#1e293b'}; color: white; border: 1px solid rgba(255,255,255,0.1);">${text}</div>`;
             chatMessages.appendChild(div);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         async function logToBackend(email, question, answer, source) {
             try {
-                await fetch('https://your-backend-url.onrender.com/log', {
+                await fetch('https://my-chatbot-backend-3y5x.onrender.com/log', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, question, answer, source })
                 });
-            } catch (e) {
-                console.error("Logging failed", e);
-            }
+            } catch (e) { console.error("Logging failed", e); }
         }
     </script>
 </body>
